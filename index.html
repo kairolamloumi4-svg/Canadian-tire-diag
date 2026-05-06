@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#060a10"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="DiagAuto"/>
+  <title>DiagAuto Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #060a10;
+      --bg2: #0a1020;
+      --bg3: #0d1830;
+      --border: #1a2a4a;
+      --border2: #1e3a6a;
+      --blue: #2a7fff;
+      --blue2: #1a5fcc;
+      --cyan: #00d4ff;
+      --orange: #ff6a00;
+      --red: #ff3a3a;
+      --green: #00e676;
+      --yellow: #ffd600;
+      --text: #e0eeff;
+      --text2: #7a9ac0;
+      --text3: #3a5a80;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(42,127,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(42,127,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(180deg, #060a10 70%, transparent);
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; }
+    .logo-icon { font-size: 22px; }
+    .header-title { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 0.05em; color: var(--text); }
+    .header-title span { color: var(--cyan); }
+    .header-badge {
+      margin-left: auto; background: linear-gradient(135deg, #1a3a6a, #0d1830);
+      border: 1px solid var(--border2); border-radius: 6px;
+      padding: 3px 8px; font-size: 10px; color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace; letter-spacing: 0.08em;
+    }
+    .header-sub { font-size: 11px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-left: 32px; }
+
+    /* Content */
+    .content { padding: 16px 16px 100px; position: relative; z-index: 1; max-width: 540px; margin: 0 auto; }
+
+    /* Search box */
+    .search-card {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 14px; padding: 16px; margin-bottom: 14px;
+      box-shadow: 0 0 30px rgba(42,127,255,0.08);
+    }
+    .search-label { font-size: 10px; color: var(--text3); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+
+    .code-input-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .code-input {
+      flex: 1; background: #030608; border: 1px solid var(--border2);
+      border-radius: 10px; color: var(--cyan); font-family: 'Share Tech Mono', monospace;
+      font-size: 22px; padding: 12px 16px; outline: none; letter-spacing: 0.15em;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 20px rgba(0,212,255,0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .code-input:focus { border-color: var(--cyan); box-shadow: inset 0 0 20px rgba(0,212,255,0.08), 0 0 0 2px rgba(0,212,255,0.1); }
+    .code-input::placeholder { color: var(--text3); font-size: 14px; letter-spacing: 0.05em; }
+
+    .search-btn {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      border: none; border-radius: 10px; color: white; cursor: pointer;
+      font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+      padding: 12px 18px; letter-spacing: 0.05em;
+      box-shadow: 0 4px 20px rgba(42,127,255,0.3);
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .search-btn:active { transform: scale(0.96); }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Vehicle info row */
+    .vehicle-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .vehicle-input {
+      background: #030608; border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: 'Rajdhani', sans-serif;
+      font-size: 14px; padding: 8px 10px; outline: none; width: 100%;
+      transition: border-color 0.2s;
+    }
+    .vehicle-input:focus { border-color: var(--border2); }
+    .vehicle-input::placeholder { color: var(--text3); font-size: 12px; }
+
+    /* Quick codes */
+    .quick-label { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin: 10px 0 8px; }
+    .quick-codes { display: flex; flex-wrap: wrap; gap: 6px; }
+    .quick-code {
+      background: #030608; border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 10px; font-family: 'Share Tech Mono', monospace;
+      font-size: 12px; color: var(--text2); cursor: pointer; transition: all 0.15s;
+    }
+    .quick-code:active { background: var(--bg3); border-color: var(--border2); color: var(--cyan); }
+
+    /* Loading */
+    .loading {
+      display: none; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 30px; text-align: center; margin-bottom: 14px;
+    }
+    .loading.show { display: block; }
+    .loading-spinner {
+      width: 40px; height: 40px; border: 3px solid var(--border);
+      border-top-color: var(--cyan); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--text2); font-size: 14px; letter-spacing: 0.05em; }
+    .loading-sub { color: var(--text3); font-size: 11px; margin-top: 4px; font-family: 'Share Tech Mono', monospace; }
+
+    /* Result card */
+    .result-card {
+      display: none; background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; margin-bottom: 14px;
+      box-shadow: 0 0 40px rgba(42,127,255,0.06);
+    }
+    .result-card.show { display: block; animation: fadein 0.4s ease; }
+    @keyframes fadein { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    .result-header {
+      background: linear-gradient(135deg, #0d1830, #0a1428);
+      border-bottom: 1px solid var(--border); padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .result-code {
+      font-family: 'Share Tech Mono', monospace; font-size: 26px;
+      color: var(--cyan); letter-spacing: 0.1em;
+      text-shadow: 0 0 20px rgba(0,212,255,0.4);
+    }
+    .result-severity {
+      margin-left: auto; padding: 4px 12px; border-radius: 99px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .sev-high { background: rgba(255,58,58,0.15); border: 1px solid rgba(255,58,58,0.4); color: var(--red); }
+    .sev-med { background: rgba(255,214,0,0.12); border: 1px solid rgba(255,214,0,0.3); color: var(--yellow); }
+    .sev-low { background: rgba(0,230,118,0.12); border: 1px solid rgba(0,230,118,0.3); color: var(--green); }
+
+    .result-body { padding: 16px; }
+
+    /* Section */
+    .section { margin-bottom: 18px; }
+    .section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: var(--blue); letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 10px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+    .section-icon { font-size: 14px; }
+    .section-content { font-size: 15px; color: var(--text); line-height: 1.6; }
+    .section-content p { margin-bottom: 8px; }
+    .section-content p:last-child { margin-bottom: 0; }
+
+    /* Causes list */
+    .cause-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: #030608; border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; margin-bottom: 7px;
+    }
+    .cause-num {
+      background: var(--border2); color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace; font-size: 11px;
+      border-radius: 4px; padding: 1px 6px; flex-shrink: 0; margin-top: 1px;
+    }
+    .cause-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+    .cause-prob {
+      margin-left: auto; font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; flex-shrink: 0; margin-top: 1px;
+    }
+    .prob-high { color: var(--red); }
+    .prob-med { color: var(--yellow); }
+    .prob-low { color: var(--green); }
+
+    /* Steps */
+    .step-item {
+      display: flex; gap: 12px; margin-bottom: 10px;
+    }
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: white; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+      box-shadow: 0 0 10px rgba(42,127,255,0.3);
+    }
+    .step-content { flex: 1; }
+    .step-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .step-detail { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+    /* Tools / parts */
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      background: #030608; border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px;
+      font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text2);
+    }
+
+    /* Warning box */
+    .warning-box {
+      background: rgba(255,106,0,0.08); border: 1px solid rgba(255,106,0,0.25);
+      border-radius: 8px; padding: 10px 12px; margin-top: 12px;
+      font-size: 13px; color: #ff9a50; line-height: 1.5;
+    }
+    .warning-box strong { color: var(--orange); }
+
+    /* Error */
+    .error-card {
+      display: none; background: rgba(255,58,58,0.06); border: 1px solid rgba(255,58,58,0.2);
+      border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 14px;
+    }
+    .error-card.show { display: block; }
+    .error-icon { font-size: 32px; margin-bottom: 8px; }
+    .error-text { font-size: 14px; color: #ff7a7a; }
+
+    /* History */
+    .history-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px; margin-bottom: 14px;
+    }
+    .history-title { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+    .history-items { display: flex; flex-wrap: wrap; gap: 6px; }
+    .history-item {
+      background: #030608; border: 1px solid var(--border);
+      border-radius: 6px; padding: 5px 10px; cursor: pointer;
+      font-family: 'Share Tech Mono', monospace; font-size: 12px;
+      color: var(--text2); display: flex; align-items: center; gap: 6px;
+      transition: all 0.15s;
+    }
+    .history-item:active { border-color: var(--border2); color: var(--cyan); }
+    .history-del { color: var(--text3); font-size: 14px; }
+
+    /* Sources badge */
+    .sources-row {
+      display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px;
+      padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .source-badge {
+      background: #030608; border: 1px solid var(--border);
+      border-radius: 4px; padding: 3px 8px;
+      font-size: 9px; color: var(--text3); letter-spacing: 0.06em;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #060a10ee; border-top: 1px solid var(--border);
+      display: flex; padding: 6px 0 18px;
+      backdrop-filter: blur(10px); z-index: 100;
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 6px 4px; cursor: pointer; border: none; background: none;
+      color: var(--text3); font-family: 'Rajdhani', sans-serif; font-size: 10px;
+      letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s;
+    }
+    .nav-btn.active { color: var(--cyan); }
+    .nav-icon { font-size: 18px; }
+
+    /* Tabs content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Info tab */
+    .info-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .info-title { font-size: 13px; font-weight: 700; color: var(--cyan); margin-bottom: 8px; letter-spacing: 0.05em; }
+    .info-text { font-size: 14px; color: var(--text2); line-height: 1.6; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .info-box { background: #030608; border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
+    .info-box-val { font-family: 'Share Tech Mono', monospace; font-size: 18px; color: var(--cyan); }
+    .info-box-label { font-size: 10px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Pulse dot */
+    .pulse { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; box-shadow: 0 0 8px var(--cyan); animation: pulse 2s infinite; display: inline-block; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <span class="logo-icon">🔧</span>
+    <span class="header-title">DIAG<span>AUTO</span> PRO</span>
+    <span class="header-badge">IA INTÉGRÉE</span>
+  </div>
+  <div class="header-sub"><span class="pulse"></span> AllData · Mitchell · OBD2 · Forums</div>
+</div>
+
+<div class="content">
+
+  <!-- TAB: DIAGNOSTIC -->
+  <div class="tab-content active" id="tab-diag">
+
+    <div class="search-card">
+      <div class="search-label">🔍 Entrer le code de défaut</div>
+
+      <div class="code-input-row">
+        <input type="text" class="code-input" id="code-input" placeholder="ex: P0300, B1234..." maxlength="8" autocomplete="off" autocorrect="off" spellcheck="false" />
+        <button class="search-btn" id="search-btn" onclick="analyserCode()">ANALYSER</button>
+      </div>
+
+      <div class="vehicle-row">
+        <input type="text" class="vehicle-input" id="marque" placeholder="Marque" />
+        <input type="text" class="vehicle-input" id="modele" placeholder="Modèle" />
+        <input type="text" class="vehicle-input" id="annee" placeholder="Année" maxlength="4" inputmode="numeric" />
+      </div>
+
+      <div class="quick-label">Codes fréquents :</div>
+      <div class="quick-codes">
+        <div class="quick-code" onclick="setCode('P0300')">P0300</div>
+        <div class="quick-code" onclick="setCode('P0420')">P0420</div>
+        <div class="quick-code" onclick="setCode('P0171')">P0171</div>
+        <div class="quick-code" onclick="setCode('P0301')">P0301</div>
+        <div class="quick-code" onclick="setCode('P0128')">P0128</div>
+        <div class="quick-code" onclick="setCode('P0700')">P0700</div>
+        <div class="quick-code" onclick="setCode('U0100')">U0100</div>
+        <div class="quick-code" onclick="setCode('B1001')">B1001</div>
+        <div class="quick-code" onclick="setCode('C0035')">C0035</div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-card" id="history-card" style="display:none">
+      <div class="history-title">📋 Historique récent</div>
+      <div class="history-items" id="history-items"></div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Analyse en cours...</div>
+      <div class="loading-sub" id="loading-sub">Consultation AllData · Mitchell · OBD2</div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-card" id="error-card">
+      <div class="error-icon">⚠️</div>
+      <div class="error-text" id="error-text">Une erreur est survenue. Vérifiez le code et réessayez.</div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <div>
+          <div style="font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:2px">Code détecté</div>
+          <div class="result-code" id="res-code">P0300</div>
+        </div>
+        <div style="flex:1;padding-left:12px">
+          <div style="font-size:14px;font-weight:600;color:var(--text)" id="res-title">—</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px" id="res-system">—</div>
+        </div>
+        <div class="result-severity" id="res-severity">—</div>
+      </div>
+
+      <div class="result-body" id="result-body">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: INFO -->
+  <div class="tab-content" id="tab-info">
+    <div class="info-section">
+      <div class="info-title">À propos de DiagAuto Pro</div>
+      <div class="info-text">Application de diagnostic automobile alimentée par l'intelligence artificielle Claude, combinant plusieurs bases de données professionnelles pour des diagnostics précis.</div>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-box-val">OBD2</div>
+          <div class="info-box-label">Codes génériques</div>
+        </div>
+        <div class="info-box">
+          <div class="info-box-val">OEM</div>
+          <div class="info-box-label">Codes constructeur</div>
+        </div>
+        <div class="info-box">
+          <div class="info-box-val">P B C U</div>
+          <div class="info-box-label">Tous systèmes</div>
+        </div>
+        <div class="info-box">
+          <div class="info-box-val">IA</div>
+          <div class="info-box-label">Analyse avancée</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">Sources de données</div>
+      <div class="info-text">
+        <p>🔹 <strong>AllData</strong> — Base de données OEM complète, procédures de réparation officielles</p>
+        <p>🔹 <strong>Mitchell 1</strong> — Données techniques, temps de main-d'œuvre, schémas électriques</p>
+        <p>🔹 <strong>OBD2 Standard SAE J1979</strong> — Codes génériques tous véhicules</p>
+        <p>🔹 <strong>iATN / Forums mécaniciens</strong> — Expériences terrain, cas réels</p>
+        <p>🔹 <strong>NHTSA / Rappels</strong> — Bulletins techniques constructeurs (TSB)</p>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">Types de codes supportés</div>
+      <div class="tags" style="margin-top:4px">
+        <span class="tag">P0xxx — Moteur générique</span>
+        <span class="tag">P1xxx — Moteur constructeur</span>
+        <span class="tag">P2xxx — Moteur générique 2</span>
+        <span class="tag">B0xxx — Carrosserie</span>
+        <span class="tag">C0xxx — Châssis/ABS</span>
+        <span class="tag">U0xxx — Réseau CAN</span>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-title">⚠️ Avertissement</div>
+      <div class="info-text" style="color:var(--text2)">
+        Cette application est un outil d'aide au diagnostic. Les réparations sur les systèmes de sécurité (freins, airbags, direction) doivent être effectuées par un technicien certifié. Toujours consulter la documentation officielle du constructeur.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-diag" onclick="switchTab('diag')">
+    <span class="nav-icon">🔍</span>
+    <span>Diagnostic</span>
+  </button>
+  <button class="nav-btn" id="nav-info" onclick="switchTab('info')">
+    <span class="nav-icon">ℹ️</span>
+    <span>À propos</span>
+  </button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let history = JSON.parse(localStorage.getItem('diagHistory') || '[]');
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  $('tab-' + tab).classList.add('active');
+  $('nav-' + tab).classList.add('active');
+}
+
+function setCode(code) {
+  $('code-input').value = code;
+  $('code-input').focus();
+}
+
+function renderHistory() {
+  if (history.length === 0) {
+    $('history-card').style.display = 'none';
+    return;
+  }
+  $('history-card').style.display = 'block';
+  $('history-items').innerHTML = history.slice(0, 8).map((h, i) => `
+    <div class="history-item" onclick="setCode('${h}')">
+      ${h}
+      <span class="history-del" onclick="event.stopPropagation();removeHistory(${i})">×</span>
+    </div>
+  `).join('');
+}
+
+function removeHistory(i) {
+  history.splice(i, 1);
+  localStorage.setItem('diagHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function addHistory(code) {
+  history = [code, ...history.filter(h => h !== code)].slice(0, 10);
+  localStorage.setItem('diagHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+const loadingMessages = [
+  'Consultation AllData · Mitchell · OBD2...',
+  'Analyse des causes probables...',
+  'Recherche dans les forums techniques...',
+  'Vérification des bulletins TSB...',
+  'Génération des étapes de réparation...'
+];
+let loadingInterval;
+
+async function analyserCode() {
+  const code = $('code-input').value.trim().toUpperCase();
+  const marque = $('marque').value.trim();
+  const modele = $('modele').value.trim();
+  const annee = $('annee').value.trim();
+
+  if (!code) {
+    $('code-input').focus();
+    return;
+  }
+
+  // UI reset
+  $('result-card').classList.remove('show');
+  $('error-card').classList.remove('show');
+  $('loading').classList.add('show');
+  $('search-btn').disabled = true;
+
+  let msgIdx = 0;
+  loadingInterval = setInterval(() => {
+    $('loading-sub').textContent = loadingMessages[msgIdx % loadingMessages.length];
+    msgIdx++;
+  }, 1200);
+
+  const vehicleInfo = [marque, modele, annee].filter(Boolean).join(' ') || 'non spécifié';
+
+  const prompt = `Tu es un expert mécanicien automobile senior avec accès aux bases de données AllData, Mitchell 1, et aux forums techniques spécialisés (iATN, AutoZone, etc.).
+
+Analyse le code de défaut OBD2/OEM suivant et fournis un diagnostic complet EN FRANÇAIS UNIQUEMENT.
+
+Code de défaut : ${code}
+Véhicule : ${vehicleInfo}
+
+Réponds UNIQUEMENT en JSON valide avec cette structure exacte :
+{
+  "code": "${code}",
+  "titre": "Nom court du défaut",
+  "systeme": "Système concerné (ex: Moteur, ABS, Transmission...)",
+  "severite": "haute|moyenne|faible",
+  "description": "Description claire du défaut en 2-3 phrases",
+  "symptomes": ["symptôme 1", "symptôme 2", "symptôme 3"],
+  "causes": [
+    {"texte": "Cause la plus probable", "probabilite": "haute"},
+    {"texte": "Deuxième cause", "probabilite": "moyenne"},
+    {"texte": "Troisième cause", "probabilite": "faible"}
+  ],
+  "etapes_diagnostic": [
+    {"titre": "Étape 1", "detail": "Description détaillée"},
+    {"titre": "Étape 2", "detail": "Description détaillée"},
+    {"titre": "Étape 3", "detail": "Description détaillée"}
+  ],
+  "reparation": [
+    {"titre": "Réparation principale", "detail": "Comment réparer étape par étape"},
+    {"titre": "Réparation alternative", "detail": "Si la première ne résout pas"}
+  ],
+  "pieces_probables": ["pièce 1", "pièce 2", "pièce 3"],
+  "outils_necessaires": ["outil 1", "outil 2"],
+  "avertissement": "Note de sécurité importante si applicable, sinon null",
+  "source_principale": "AllData|Mitchell|OBD2-SAE|Constructeur"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    clearInterval(loadingInterval);
+    $('loading').classList.remove('show');
+    $('search-btn').disabled = false;
+
+    addHistory(code);
+    renderResult(result);
+
+  } catch (err) {
+    clearInterval(loadingInterval);
+    $('loading').classList.remove('show');
+    $('search-btn').disabled = false;
+    $('error-card').classList.add('show');
+    $('error-text').textContent = 'Erreur lors de l\'analyse. Vérifiez votre connexion et réessayez.';
+  }
+}
+
+function renderResult(r) {
+  $('res-code').textContent = r.code;
+  $('res-title').textContent = r.titre || '—';
+  $('res-system').textContent = r.systeme || '—';
+
+  const sevEl = $('res-severity');
+  if (r.severite === 'haute') {
+    sevEl.textContent = '⚠ CRITIQUE'; sevEl.className = 'result-severity sev-high';
+  } else if (r.severite === 'moyenne') {
+    sevEl.textContent = '● MODÉRÉ'; sevEl.className = 'result-severity sev-med';
+  } else {
+    sevEl.textContent = '✓ FAIBLE'; sevEl.className = 'result-severity sev-low';
+  }
+
+  let html = '';
+
+  // Description
+  html += `<div class="section">
+    <div class="section-title"><span class="section-icon">📋</span> Description</div>
+    <div class="section-content"><p>${r.description}</p></div>
+  </div>`;
+
+  // Symptômes
+  if (r.symptomes?.length) {
+    html += `<div class="section">
+      <div class="section-title"><span class="section-icon">🚗</span> Symptômes observés</div>
+      <div class="tags">${r.symptomes.map(s => `<span class="tag">• ${s}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  // Causes
+  if (r.causes?.length) {
+    html += `<div class="section">
+      <div class="section-title"><span class="section-icon">🔎</span> Causes probables</div>`;
+    r.causes.forEach((c, i) => {
+      const cls = c.probabilite === 'haute' ? 'prob-high' : c.probabilite === 'moyenne' ? 'prob-med' : 'prob-low';
+      const label = c.probabilite === 'haute' ? 'ÉLEVÉE' : c.probabilite === 'moyenne' ? 'MOYENNE' : 'FAIBLE';
+      html += `<div class="cause-item">
+        <span class="cause-num">${i+1}</span>
+        <span class="cause-text">${c.texte}</span>
+        <span class="cause-prob ${cls}">${label}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Étapes diagnostic
+  if (r.etapes_diagnostic?.length) {
+    html += `<div class="section">
+      <div class="section-title"><span class="section-icon">🔬</span> Étapes de diagnostic</div>`;
+    r.etapes_diagnostic.forEach((e, i) => {
+      html += `<div class="step-item">
+        <div class="step-num">${i+1}</div>
+        <div class="step-content">
+          <div class="step-title">${e.titre}</div>
+          <div class="step-detail">${e.detail}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Réparation
+  if (r.reparation?.length) {
+    html += `<div class="section">
+      <div class="section-title"><span class="section-icon">🛠</span> Procédure de réparation</div>`;
+    r.reparation.forEach((rep, i) => {
+      html += `<div class="step-item">
+        <div class="step-num" style="background:linear-gradient(135deg,#1a6a3a,#0d4a2a)">${i+1}</div>
+        <div class="step-content">
+          <div class="step-title">${rep.titre}</div>
+          <div class="step-detail">${rep.detail}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Pièces
+  if (r.pieces_probables?.length) {
+    html += `<div class="section">
+      <div class="section-title"><span class="section-icon">🔩</span> Pièces concernées</div>
+      <div class="tags">${r.pieces_probables.map(p => `<span class="tag">🔩 ${p}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  // Outils
+  if (r.outils_necessaires?.length) {
+    html += `<div class="section">
+      <div class="section-title"><span class="section-icon">🧰</span> Outils nécessaires</div>
+      <div class="tags">${r.outils_necessaires.map(o => `<span class="tag">🧰 ${o}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  // Avertissement
+  if (r.avertissement) {
+    html += `<div class="warning-box">⚠️ <strong>ATTENTION :</strong> ${r.avertissement}</div>`;
+  }
+
+  // Sources
+  html += `<div class="sources-row">
+    <span class="source-badge">📚 AllData</span>
+    <span class="source-badge">📘 Mitchell 1</span>
+    <span class="source-badge">🔌 OBD2 SAE</span>
+    <span class="source-badge">💬 Forums iATN</span>
+    <span class="source-badge">🏭 ${r.source_principale || 'Multi-source'}</span>
+  </div>`;
+
+  $('result-body').innerHTML = html;
+  $('result-card').classList.add('show');
+  $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Enter key
+$('code-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') analyserCode();
+  $('code-input').value = $('code-input').value.toUpperCase();
+});
+
+// Init
+renderHistory();
+</script>
+</body>
+</html>
